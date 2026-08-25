@@ -31,6 +31,7 @@ This matrix links production requirements to implementation, task ownership, ver
 | REQ-HISTORY-02 Department Head historical view is assignment-scoped | T12 | analytics EXISTS effective assignment predicate | `db:proof:administration` | G2/G5 |
 | REQ-UI-01 Active shell must not use seed authority | T05/T10-B/C | API-backed workspaces | active import audit; browser E2E | G7 |
 | REQ-UI-02 High-value mutation persists across reload | T10-H | real Chrome Playwright proof | `npm run proof:browser-e2e` | G7 |
+| REQ-UI-03 Production copy is encoding-clean and free of internal task/migration labels | T10-J | production components + UI-copy regression guard | `ui-copy.test.ts`; 15-surface Chrome rendered-copy scan | G7 |
 | REQ-OBS-01 Correlated structured request telemetry | T10-G | Proxy + HTTP helpers + instrumentation | logger/metrics tests; observability proof | G8 |
 | REQ-OBS-02 Bounded-cardinality Prometheus metrics | T10-G | route normalization + `/api/metrics` | metrics tests; observability proof | G8 |
 | REQ-OBS-03 Production metric scrape protected | T10-G/T17 | `METRICS_TOKEN` auth | local behavior + target collector evidence | G8/G12 |

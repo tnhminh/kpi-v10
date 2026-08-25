@@ -264,12 +264,52 @@ Make sensitive mutation history tenant-scoped, append-only and request-correlate
 - T10-G bounded-cardinality observability + protected Prometheus endpoint.
 - T10-H real system-Chrome browser E2E/reload proof.
 - T10-I isolated PostgreSQL backup/restore + restored standalone readiness proof.
+- T10-J system-wide UI copy/encoding cleanup + rendered-copy regression coverage.
 
 ### Acceptance Criteria
 - [x] Repository/local hardening subphases have repeatable proof commands.
 - [x] Browser E2E PASS using real local Chrome.
 - [x] Restore rehearsal PASS using isolated temporary PostgreSQL cluster.
 - [ ] External runtime/integration/deployment gates are closed by T14–T18.
+
+---
+
+## T10-J — System-wide UI copy and encoding cleanup
+**Status:** DONE
+**Priority:** P1
+**Risk:** Medium (user-facing quality / regression)
+**Dependencies:** T05–T10-I
+
+### Goal
+Remove broken UTF-8/mojibake text, spelling/grammar defects, duplicate or misleading labels, and internal implementation/task identifiers from production-facing UI copy.
+
+### Scope
+- Fix mojibake in KPI Builder separators, arrows and ellipses.
+- Correct ambiguous/duplicate Administration, Evaluation, Jira, Member and Team labels.
+- Remove internal labels such as `T08`, `T08-B` and `migration 0012` from rendered product copy.
+- Add source-level copy regression tests.
+- Expand real-Chrome E2E copy inspection across 15 critical application surfaces.
+
+### Acceptance Criteria
+- [x] No common mojibake markers remain in production `.tsx` components.
+- [x] No internal `T08`/migration labels remain in user-facing components covered by the regression rule.
+- [x] Administration user table has unambiguous `User status` / `Access status` headers.
+- [x] Singular/plural quality-issue label renders correctly.
+- [x] lint/typecheck/tests/build PASS with 32/32 test files and 149/149 tests.
+- [x] Real system-Chrome E2E visits 15 critical surfaces, checks rendered text for forbidden copy markers, persists a UI mutation across reload, and reports 0 page errors.
+- [x] Localhost root/health/readiness remain HTTP 200 after the change.
+
+### Verification
+- `npm run lint`
+- `npm run typecheck`
+- `npm run test`
+- `npm run build`
+- `npm run proof:browser-e2e`
+- production-component mojibake/internal-label source scan
+- `git diff --check`
+
+### Definition of Done
+Copy is source-clean and rendered-clean, regression guards exist, browser proof passes, and release/handoff docs reflect the new baseline.
 
 ---
 

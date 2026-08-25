@@ -238,7 +238,7 @@ export default function ReviewWorkspace({ organization, mode }: { organization: 
       <aside className="kpi-scroll overflow-y-auto border-l border-slate-200 bg-white p-4">
         <div><h3 className="text-sm font-semibold">Review integrity</h3><p className="mt-1 text-[10px] leading-4 text-slate-500">System evidence remains unchanged. Each human layer is additive and historical.</p></div>
         <div className="mt-4 space-y-2">
-          <Card className="p-3"><div className="text-[9px] font-bold uppercase tracking-wide text-slate-400">Authority</div><div className="mt-1 text-xs font-semibold">{mode === "LEADER" ? "Effective team leadership at period date" : "Department review permission"}</div></Card>
+          <Card className="p-3"><div className="text-[9px] font-bold uppercase tracking-wide text-slate-400">Authority</div><div className="mt-1 text-xs font-semibold">{mode === "LEADER" ? "Effective team leadership at period date" : "Effective department assignment at period date"}</div></Card>
           <Card className="p-3"><div className="text-[9px] font-bold uppercase tracking-wide text-slate-400">Adjustment audit</div><div className="mt-1 text-xs font-semibold">Before → after → reason → actor</div></Card>
           <Card className="p-3"><div className="text-[9px] font-bold uppercase tracking-wide text-slate-400">Finalization</div><div className="mt-1 text-xs font-semibold">Complete Head scores + zero unresolved CRITICAL</div></Card>
           <Card className="p-3"><div className="text-[9px] font-bold uppercase tracking-wide text-slate-400">Lock</div><div className="mt-1 text-xs font-semibold">Canonical snapshot + SHA-256 checksum</div></Card>

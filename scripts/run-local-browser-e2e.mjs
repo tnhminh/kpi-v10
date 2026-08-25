@@ -37,10 +37,19 @@ function chromeExecutable() {
   return executable;
 }
 
+const forbiddenUiCopy = ["Â·", "â†’", "â€¦", "Ã", "�", "ðŸ", "â€", "Integration · T08", "Until T08", "T08-B snapshots", "migration 0012"];
+
+async function assertCleanUiCopy(page, contextLabel) {
+  const text = await page.locator("body").innerText();
+  const matches = forbiddenUiCopy.filter((marker) => text.includes(marker));
+  if (matches.length) throw new Error(`UI copy regression on ${contextLabel}: ${matches.join(", ")}`);
+}
+
 async function waitForHealthyPage(page, expectedText) {
   await page.getByText(expectedText, { exact: false }).first().waitFor({ state: "visible", timeout: 15_000 });
   const failure = page.getByText("Unable to load data", { exact: false });
   if (await failure.count()) throw new Error(`UI reported a data-load failure while opening ${expectedText}.`);
+  await assertCleanUiCopy(page, expectedText);
 }
 
 const sql = postgres(process.env.DATABASE_URL, { max: 1, connect_timeout: 5, prepare: false });
@@ -122,13 +131,21 @@ try {
   await page.getByText(teamName, { exact: true }).waitFor({ state: "visible", timeout: 15_000 });
 
   const navigationChecks = [
+    ["Members", "Members"],
+    ["KPI Templates", "KPI templates"],
+    ["KPI Builder", "KPI Builder"],
+    ["Metric Library", "Metric Library"],
+    ["Scoring Rules", "Scoring Rules"],
     ["Evaluation Periods", "Evaluation periods"],
-    ["System Evaluation", "System Evaluation"],
+    ["System Evaluation", "System evaluation pipeline"],
     ["Leader Review", "Leader Review"],
     ["Calibration", "Department Head Calibration"],
-    ["Jira Integration", "Jira"],
-    ["Historical Analytics", "Historical"],
-    ["Settings", "Administration"],
+    ["Data Quality", "Data Quality"],
+    ["Jira Integration", "Jira Control Center"],
+    ["Historical Analytics", "Historical analytics"],
+    ["Rank Schemes", "Rank Schemes"],
+    ["Audit Log", "Audit log"],
+    ["Settings", "Organization administration"],
   ];
   const checked = [];
   for (const [navTitle, expectedText] of navigationChecks) {

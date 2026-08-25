@@ -262,6 +262,19 @@ Verification to date:
 - [ ] Real Atlassian credentialed sync remains unverified.
 - [x] Remote container build/runtime proof PASS via T16; target deploy, target pre-migration backup/restore readiness, production secret distribution, and target observability backend integration remain release gates.
 
+## T10-J — UI copy / encoding consistency
+**Status:** PASS
+
+Verification:
+- [x] KPI Builder mojibake (`Â·`, broken arrow and ellipsis sequences) was replaced with valid UTF-8 punctuation.
+- [x] Production component scan found no remaining common mojibake markers.
+- [x] User-facing `T08`, `T08-B` and `migration 0012` implementation labels were removed; source scan PASS.
+- [x] Administration duplicate `User` header was corrected to `User status` / `Access status`; additional Team/Member/Evaluation/Jira/Review wording was normalized.
+- [x] `src/components/ui-copy.test.ts` adds 3 regression tests for encoding, internal labels and Administration headers.
+- [x] Full gate PASS: lint, typecheck, 32/32 test files, 149/149 tests, production build.
+- [x] `npm run proof:browser-e2e` PASS in system Chrome across Members, KPI Templates, KPI Builder, Metric Library, Scoring Rules, Evaluation Periods, System Evaluation, Leader Review, Calibration, Data Quality, Jira Integration, Historical Analytics, Rank Schemes, Audit Log and Settings; rendered-copy scan PASS and pageErrors=0.
+- [x] Localhost root, `/api/health`, and `/api/ready` all returned HTTP 200 after the changes.
+
 ## T15 — Remote GitHub CI execution
 **Status:** PASS
 
