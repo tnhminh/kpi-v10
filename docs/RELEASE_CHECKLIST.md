@@ -8,6 +8,7 @@ These checks do not substitute for the production-specific boxes below.
 - [x] `npm run proof:release-local` PASS on 2026-08-25: verify, production dependency audit, 14/14 migration parity, critical DB/API proofs, observability, real system-Chrome E2E, and isolated backup/restore.
 - [x] Real Jira verifier harness fails closed without credentials and does not print credential values; credentialed Jira execution remains external.
 - [x] Remote GitHub Actions PASS for reviewed commit `c9274f8` after CI-only metrics-auth environment isolation was fixed and rerun.
+- [x] Remote Docker build/runtime proof PASS for commit `e2171c9`: image ID `sha256:ef6b06304378a1d1002e554e6be5d41c137c032ff7823b264bd4bf96ce44b1f7`, UID 1001, health/readiness PASS.
 
 ## Build and supply chain
 - [ ] Reviewed commit/release identifier recorded.

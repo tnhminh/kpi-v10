@@ -231,11 +231,11 @@ Verification:
 - [x] Browser click-through PASS via real system Chrome in `npm run proof:browser-e2e`; Historical Analytics navigation completed with zero page errors.
 
 ## T10 — Production hardening
-**Status:** IN PROGRESS — T10-A through T10-I repository/local gates PASS; real Jira/remote CI/container/target-production gates remain open
+**Status:** IN PROGRESS — repository/local + remote CI/container gates PASS; real Jira and target-production gates remain open
 
 Verification to date:
 - [x] Next.js standalone production output enabled and production build PASS.
-- [x] Multi-stage non-root Dockerfile and `.dockerignore` added; Docker build itself is environment-blocked because the local host has no Docker CLI.
+- [x] Multi-stage non-root Dockerfile and `.dockerignore` added; T16 later proved the real Docker build/runtime on GitHub Actions despite Docker being unavailable on the local host.
 - [x] Remote GitHub Actions execution PASS for commit `c9274f8`: install, full verify, PostgreSQL migration/parity and production dependency audit completed successfully after one CI-only metrics-auth test isolation defect was fixed and rerun.
 - [x] Migration parity proof PASS: 14/14 migrations, latest `0014_user_onboarding`.
 - [x] `npm audit --omit=dev` reports 0 vulnerabilities.
@@ -260,7 +260,7 @@ Verification to date:
 - [x] Current full automated gate: lint PASS, typecheck PASS, 31 test files / 146 tests PASS, production build PASS.
 - [x] Browser click/reload E2E regression PASS via installed system Chrome: login, UI Team create, DB persistence, reload persistence, critical navigation, and zero page errors.
 - [ ] Real Atlassian credentialed sync remains unverified.
-- [ ] Production/container runtime proof is being moved to GitHub Actions; target deploy, target pre-migration backup/restore readiness, production secret distribution, and target observability backend integration remain release gates.
+- [x] Remote container build/runtime proof PASS via T16; target deploy, target pre-migration backup/restore readiness, production secret distribution, and target observability backend integration remain release gates.
 
 ## T15 — Remote GitHub CI execution
 **Status:** PASS
@@ -271,6 +271,18 @@ Verification:
 - [x] Test isolation was fixed by explicitly stubbing empty `METRICS_TOKEN`; security/runtime authorization logic was not weakened.
 - [x] CI-like local reproduction with a preset metrics token PASSed the targeted test, then full `npm run verify` PASSed 31/31 test files, 146/146 tests and production build.
 - [x] Fix commit `c9274f8` GitHub Actions run completed `success`.
+
+## T16 — Container image/runtime evidence
+**Status:** PASS
+
+Verification:
+- [x] GitHub Actions run `32852668799` for reviewed commit `e2171c9` completed `success`.
+- [x] `docker build` produced content-addressed image ID `sha256:ef6b06304378a1d1002e554e6be5d41c137c032ff7823b264bd4bf96ce44b1f7`.
+- [x] `docker run --entrypoint id ... -u` returned UID `1001`, proving non-root runtime.
+- [x] Runtime configuration was injected through `docker run -e`; `.env*` remains excluded by `.dockerignore`.
+- [x] Container `/api/health` returned `status=ok`.
+- [x] Container `/api/ready` returned `status=ready` with both configuration and database checks `ok` against CI PostgreSQL.
+- [x] No T16 failed step remained in the successful Actions run.
 
 ## Review checklist
 - Does the implementation enforce domain rules server-side where required?

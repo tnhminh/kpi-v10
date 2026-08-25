@@ -439,7 +439,7 @@ Missing Actions permission/runner is `BLOCKED_EXTERNAL`; workflow defects are `B
 ---
 
 ## T16 — Container image/runtime evidence
-**Status:** IN_PROGRESS — remote GitHub Actions runtime proof
+**Status:** DONE
 **Priority:** P0 when container deployment is target
 **Risk:** High
 **Dependencies:** T13
@@ -451,11 +451,14 @@ Build and run the reviewed release image and record immutable digest/non-root/re
 Docker/Podman remain unavailable on the local host, but GitHub-hosted Ubuntu runners provide a Docker daemon. T16 now uses remote CI to build the reviewed image, record its content-addressed image ID, inspect non-root UID, start the container with runtime-injected environment, and verify health/readiness against the CI PostgreSQL service.
 
 ### Acceptance Criteria
-- [ ] `docker build` (or approved compatible builder) succeeds from reviewed commit.
-- [ ] immutable image digest recorded.
-- [ ] process runs non-root.
-- [ ] production env is injected at runtime, not baked into image.
-- [ ] `/api/health` and `/api/ready` PASS from container.
+- [x] `docker build` succeeds from reviewed commit `e2171c9` in GitHub Actions.
+- [x] Content-addressed image ID recorded: `sha256:ef6b06304378a1d1002e554e6be5d41c137c032ff7823b264bd4bf96ce44b1f7`.
+- [x] Runtime process is non-root: UID `1001`.
+- [x] Production environment is injected with `docker run -e ...`; `.env*` is excluded from build context by `.dockerignore`.
+- [x] Container `/api/health` returns `status=ok`; `/api/ready` returns `status=ready` with configuration/database checks `ok`.
+
+### Verification
+GitHub Actions run `32852668799` for commit `e2171c9` completed `success`. See `docs/QA.md` T16.
 
 ### Exact closure command
 See `docs/OPERATIONS.md` container commands.

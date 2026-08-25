@@ -131,19 +131,18 @@ Remote PASS:
 - Remote job includes clean install, full verify, PostgreSQL migration/parity and production dependency audit.
 
 ## G11 — Runtime / Container
-**Status:** IN_PROGRESS — remote CI container proof
+**Status:** PASS (repository/remote CI)
 
-PASS:
+Evidence:
 - Next.js standalone build/runtime proof.
 - non-root multi-stage Dockerfile reviewed in repository.
+- GitHub Actions run `32852668799` on commit `e2171c9` built the real image successfully.
+- Content-addressed image ID: `sha256:ef6b06304378a1d1002e554e6be5d41c137c032ff7823b264bd4bf96ce44b1f7`.
+- Runtime UID: `1001` (non-root).
+- Runtime-injected production configuration connected the container to CI PostgreSQL.
+- Container `/api/health` returned `status=ok`; `/api/ready` returned `status=ready` with configuration/database checks `ok`.
 
-Open:
-- real container image build,
-- immutable digest,
-- non-root runtime inspection,
-- container health/readiness.
-
-Current host has no Docker/Podman. Owner task: T16.
+The actual production registry/artifact promotion and target deployment remain G13/G14, not G11.
 
 ## G12 — Security / Secret management
 **Status:** PARTIAL
@@ -205,4 +204,4 @@ PASS conditions:
 
 Current decision: **NO_GO_EXTERNAL_GATES_OPEN**.
 
-Primary open gates: real Jira if production-required, remote CI, container evidence for container target, production secret/infrastructure configuration, central logs/metrics/alerts, production deploy/rollback and post-deploy smoke.
+Primary open gates: real Jira if production-required, production secret/infrastructure configuration, central logs/metrics/alerts, production artifact promotion/deploy/rollback and post-deploy smoke.
