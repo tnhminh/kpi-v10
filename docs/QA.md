@@ -90,7 +90,7 @@ Verification:
 - [x] Local live login/session integration (2026-08-25): `/api/ready` 200, credentialed `/api/auth/login` 200, session cookie accepted, and authenticated `/api/organizations` 200 for the provisioned local administrator.
 
 ## T05 — Organization + KPI APIs
-**Status:** PASS — T05-A/T05-B/T05-C complete; code/offline gates passed at the original checkpoint and later local PostgreSQL/API integration was completed during T06/T07. Browser reload persistence remains a separate pending gate.
+**Status:** PASS — T05-A/T05-B/T05-C complete; local PostgreSQL/API integration and real system-Chrome reload persistence are now verified.
 
 T05-A verification:
 - [x] Explicit user-to-organization access scope exists with an organization-specific role.
@@ -137,11 +137,11 @@ T05-C verification:
 - [x] Final Next.js 16.3.2 production build PASS with authenticated organization/KPI UI and protected API routes.
 - [x] Final T05 code/data-integrity/security/documentation review completed.
 - [x] Local persistent demo-seed smoke test (2026-08-25): seed script syntax and ESLint PASS; authenticated API reads returned Teams=6, Members=14, Templates=1; KPI versions `v2:DRAFT,v1:PUBLISHED`; v2 detail contains 5 criteria.
-- [ ] High-value UI mutations persist across browser reload against the credentialed local migrated DB: environment is now available; browser persistence regression is still pending.
-- [ ] Live database integration/trigger behavior coverage: migrations execute locally, but trigger mutation cases and broader protected API integration tests still need explicit coverage.
+- [x] High-value UI mutation/reload persistence PASS: `npm run proof:browser-e2e` creates a Team through the real UI, verifies PostgreSQL persistence, reloads the browser, and confirms the Team remains visible.
+- [x] Live database integration/trigger behavior coverage PASS for critical invariants through T06/T07/T09 mutation probes: assignment freeze, membership resolution, finalized/locked immutability, historical snapshot immutability, quality disposition immutability, append-only audit, and audited-actor retention.
 
 ## T06 — Evaluation pipeline
-**Status:** PASS (code + live local PostgreSQL/API integration; browser smoke environment-blocked)
+**Status:** PASS (code + live local PostgreSQL/API integration + real system-Chrome browser smoke)
 
 Verification:
 - [x] Period, assignment, collection lifecycle, evaluation execution and evaluation-result APIs are authenticated and organization-scoped.
@@ -160,10 +160,10 @@ Verification:
 - [x] Final typecheck PASS.
 - [x] Final unit suite PASS: 22 test files / 106 tests.
 - [x] Final Next.js 16.3.2 production build PASS with evaluation routes.
-- [ ] Browser click-through for Evaluation Periods/System Evaluation: environment-blocked because ChatCode browser capability reports unavailable; no false PASS recorded.
+- [x] Browser click-through for Evaluation Periods/System Evaluation PASS via real system Chrome in `npm run proof:browser-e2e`; no page errors observed.
 
 ## T07 — Human review, finalization, and lock
-**Status:** PASS (code + live local PostgreSQL/API integration; browser smoke environment-blocked)
+**Status:** PASS (code + live local PostgreSQL/API integration + real system-Chrome browser smoke)
 
 Verification:
 - [x] Leader Review and Department Head Calibration use persisted protected APIs rather than seeded score authority.
@@ -184,10 +184,10 @@ Verification:
 - [x] Final typecheck PASS.
 - [x] Final unit suite PASS: 24 test files / 116 tests.
 - [x] Final Next.js 16.3.2 production build PASS with review/quality/finalize/lock dynamic routes.
-- [ ] Browser click-through for Leader Review/Calibration: environment-blocked because ChatCode browser capability reports unavailable; no false PASS recorded.
+- [x] Browser click-through for Leader Review/Calibration PASS via real system Chrome in `npm run proof:browser-e2e`; no page errors observed.
 
 ## T08 — Jira integration boundary
-**Status:** PASS — code + live local PostgreSQL/API snapshot-integrity proof; real Atlassian credentialed sync and browser click-through remain production/integration gates
+**Status:** PASS — code + live local PostgreSQL/API snapshot-integrity proof + browser click-through; real Atlassian credentialed sync remains the open production integration gate
 
 Verification:
 - [x] Migration `0011_jira_sync_foundation.sql` applied to local PostgreSQL.
@@ -207,7 +207,7 @@ Verification:
 - [x] Jira provider unit coverage PASS: period/issue filtering, aggregation, missing required facts, median duration, frozen snapshot reuse.
 - [x] T08-B automated closeout: lint PASS, typecheck PASS, 28 test files / 128 tests PASS, Next.js 16.3.2 production build PASS with `/evaluate-jira`.
 - [x] Local API+DB T08-B proof PASS: `npm run db:evaluate:jira-demo` authenticated a short-lived verifier, evaluated 14/14 eligible members twice, persisted 14 member evaluations and 84 distinct contributing issue snapshots, then deliberately mutated a current Jira fact; snapshot digest and persisted evaluation scores remained unchanged on rerun. The current fact and verifier identity were restored/removed in cleanup.
-- [ ] Browser click-through remains environment-blocked while ChatCode browser capability is unavailable.
+- [x] Browser click-through PASS via real system Chrome in `npm run proof:browser-e2e`; Jira Integration navigation completed with zero page errors.
 
 ## T09 — Audit and historical analytics
 **Status:** PASS — code + live local PostgreSQL/API integrity proof
@@ -228,10 +228,10 @@ Verification:
 - [x] Final typecheck PASS.
 - [x] Final unit suite PASS: 29 test files / 134 tests.
 - [x] Final Next.js 16.3.2 production build PASS with `/api/organizations/[organizationId]/audit` and `/analytics/history`.
-- [ ] Browser click-through remains environment-blocked while ChatCode browser capability is unavailable; no false PASS recorded.
+- [x] Browser click-through PASS via real system Chrome in `npm run proof:browser-e2e`; Historical Analytics navigation completed with zero page errors.
 
 ## T10 — Production hardening
-**Status:** IN PROGRESS — T10-A/B/C/D/E/F/G repository/local gates PASS; external production/E2E/monitoring-backend gates remain open
+**Status:** IN PROGRESS — T10-A through T10-I repository/local gates PASS; real Jira/remote CI/container/target-production gates remain open
 
 Verification to date:
 - [x] Next.js standalone production output enabled and production build PASS.
@@ -241,6 +241,7 @@ Verification to date:
 - [x] `npm audit --omit=dev` reports 0 vulnerabilities.
 - [x] Standalone production server boot proof: `/api/health` 200 and `/api/ready` 200 with PostgreSQL connectivity.
 - [x] Operations and release docs cover migration ordering, backup/restore, rollback, readiness and release checks.
+- [x] Local backup/restore rehearsal PASS: `npm run proof:restore` creates a dump, restores into an isolated temporary PostgreSQL cluster on ephemeral ports, verifies 14/14 migrations + key integrity triggers + representative data, boots the standalone app against the restored DB, receives `/api/ready` 200, and cleans temporary artifacts.
 - [x] Executive Dashboard is API-backed and role-scoped; live proof returned 6 teams, 14 members, 14 current evaluations, history score 8.72 and 14/28 coverage.
 - [x] Active component tree has no `@/lib/kpi` import.
 - [x] Metric Library, Scoring Rules, Data Quality and Rank Schemes are API-backed; live proof returned 4 metrics, 1 rank scheme/7 validated bands, 8 scoring rules and 3 persisted quality issues.
@@ -257,9 +258,9 @@ Verification to date:
 - [x] Live observability proof on port 3712 PASS: health 200, readiness 200, unauthenticated `/api/auth/me` 401, metrics 200, request/duration/error/readiness signals present.
 - [x] Structured logger boundary redacts sensitive-key fields, bearer values and credential-bearing URLs before emission, safely serializes Error/circular values, and preserves canonical timestamp/level/message/service fields against caller override.
 - [x] Current full automated gate: lint PASS, typecheck PASS, 31 test files / 146 tests PASS, production build PASS.
-- [ ] Browser click/reload E2E regression remains environment-blocked by unavailable ChatCode browser capability.
+- [x] Browser click/reload E2E regression PASS via installed system Chrome: login, UI Team create, DB persistence, reload persistence, critical navigation, and zero page errors.
 - [ ] Real Atlassian credentialed sync remains unverified.
-- [ ] Production Docker build/deploy, CI execution, backup restore rehearsal, secrets distribution and observability backend integration remain external release gates.
+- [ ] Production Docker image/build/deploy, remote CI execution, target pre-migration backup/restore readiness, production secret distribution, and target observability backend integration remain release gates.
 
 ## Review checklist
 - Does the implementation enforce domain rules server-side where required?

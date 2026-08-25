@@ -2,6 +2,7 @@ import { mkdtemp, mkdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawn } from "node:child_process";
+import { createServer } from "node:net";
 import postgres from "postgres";
 
 if (process.env.NODE_ENV === "production") throw new Error("Local restore drill is disabled in production.");
@@ -18,7 +19,25 @@ const dumpPath = join(workDir, "backup.dump");
 const postgresLog = join(workDir, "postgres.log");
 const targetDb = "kpi_restore";
 const targetUser = "kpi_restore_admin";
-const targetPort = 55432 + Math.floor(Math.random() * 400);
+
+function findFreePort() {
+  return new Promise((resolve, reject) => {
+    const server = createServer();
+    server.unref();
+    server.on("error", reject);
+    server.listen(0, "127.0.0.1", () => {
+      const address = server.address();
+      if (!address || typeof address === "string") {
+        server.close(() => reject(new Error("Could not allocate a local proof port.")));
+        return;
+      }
+      const port = address.port;
+      server.close((error) => error ? reject(error) : resolve(port));
+    });
+  });
+}
+
+const targetPort = await findFreePort();
 await mkdir(dataDir, { recursive: true });
 
 function sourcePgEnv() {
@@ -139,7 +158,7 @@ try {
   }
   if (guards.length !== 3) throw new Error(`Expected integrity triggers are missing after restore; found ${guards.length}/3.`);
 
-  const appPort = 3720;
+  const appPort = await findFreePort();
   const baseUrl = `http://127.0.0.1:${appPort}`;
   appProcess = spawn(process.execPath, [".next/standalone/server.js"], {
     cwd: process.cwd(),

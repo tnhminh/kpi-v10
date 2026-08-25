@@ -90,7 +90,7 @@ Finalization derives criterion final values and aggregate final KPI/rank only af
 ## ADR-016 — Department review scope and critical-quality disposition are explicit historical facts
 **Status:** Accepted
 
-A `DEPARTMENT_HEAD` role is not organization-wide review authority. Department review APIs resolve period-effective `department_head_assignments`; an unassigned Department Head receives no department queue. Administrator remains the explicit broader administrative bypass. This mirrors period-effective Team Leader scope and prevents a coarse organization role from silently widening review authority.
+A `DEPARTMENT_HEAD` role is not organization-wide review or historical-analytics authority. Department review and Department Head historical analytics resolve period-effective `department_head_assignments`; an unassigned Department Head receives no department queue and no department historical rows. Administrator remains the explicit broader administrative bypass. This mirrors period-effective Team Leader scope and prevents a coarse organization role from silently widening authority.
 
 A CRITICAL data-quality issue may block finalization, but the workflow must not become permanently unfinishable. Department Head/Admin may explicitly mark an issue `RESOLVED` or `WAIVED` only with a non-empty reason, actor and timestamp. Once resolved/waived, that disposition is immutable and is included in the locked historical snapshot, so the exception itself remains reproducible and auditable.
 
@@ -121,3 +121,18 @@ A provisioned account starts with `password_change_required=true`. The resulting
 The application owns a small vendor-neutral observability boundary instead of coupling domain code to one monitoring vendor. Next.js Proxy injects request correlation and an internal start timestamp for `/api/*` only; it is metadata plumbing and never grants authentication or authorization. Central API response helpers record structured completion events, request/error counters and latency histograms, while Next.js instrumentation captures uncaught request errors outside the normal API helper path. The structured logger recursively redacts sensitive keys and credential-bearing strings, handles non-JSON-safe Error/circular values, and writes canonical timestamp/level/message/service fields after sanitized caller data so the event envelope cannot be spoofed.
 
 Prometheus-compatible metrics are exposed per application process through `/api/metrics`. Dynamic UUID and numeric path segments are normalized before becoming labels so tenant/member/evaluation IDs cannot create unbounded metric cardinality. Production scrape access requires an independent `METRICS_TOKEN`; it is not reused from `AUTH_SECRET` and is never logged. The metrics endpoint intentionally does not count its own scrape traffic. Aggregation across replicas, durable retention, dashboards and alert delivery remain infrastructure responsibilities of the target environment rather than in-process application state.
+
+## ADR-021 — Browser release evidence uses installed system Chrome when connector browser capability is unavailable
+**Status:** Accepted
+
+Repository/local browser acceptance is produced by Playwright Core against the installed system Chrome rather than depending on the ChatCode browser engine. The proof logs in through the real UI, performs a persisted Team mutation, verifies PostgreSQL persistence, reloads the browser, checks the mutation remains visible, navigates critical workspaces, and fails on page errors or visible authoritative-data load failures. This is repository/local release evidence only; target-production browser smoke is still required after deployment.
+
+## ADR-022 — Restore rehearsal uses an isolated temporary PostgreSQL cluster with ephemeral ports
+**Status:** Accepted
+
+The application development DB role intentionally does not require database-creation privileges. The restore proof therefore dumps the authorized local source DB, initializes a separate temporary PostgreSQL cluster, allocates ephemeral loopback ports for PostgreSQL and the restored standalone app, restores the dump there, verifies migration parity/data/integrity triggers, and boots the standalone runtime against the restored database. Temporary cluster/dump artifacts are removed after the proof. Ephemeral ports avoid false failures from fixed-port collisions and keep the rehearsal isolated from the active development database.
+
+## ADR-023 — Production closure tasks use an explicit implement-test-review repair loop
+**Status:** Accepted
+
+Every remaining production task follows IMPLEMENT → TEST → REVIEW. Any failure returns to FIX → TEST AGAIN → REVIEW AGAIN until green. A task is marked DONE only after objective verification and documentation/handoff reconciliation; unavailable external credentials or infrastructure are recorded as BLOCKED_EXTERNAL rather than treated as implementation success or failure.

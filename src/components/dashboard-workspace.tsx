@@ -69,7 +69,7 @@ function historyStats(history: HistoricalAnalyticsDto) {
     { label: "Persisted Evaluations", value: String(history.summary.totalCount), hint: "Includes non-final coverage" },
     { label: "Latest Final Score", value: history.latest ? history.latest.score.toFixed(2) : "N/A", hint: history.latest?.periodKey ?? "No finalized result" },
     { label: "Latest Rank", value: history.latest?.rank ?? "N/A", hint: history.latest?.coefficient === null || history.latest?.coefficient === undefined ? "No coefficient" : `Coefficient ${history.latest.coefficient}` },
-    { label: "Analytics Scope", value: history.scope === "ORGANIZATION" ? "Organization" : "Self", hint: "Server-authorized scope" },
+    { label: "Analytics Scope", value: history.scope === "ORGANIZATION" ? "Organization" : history.scope === "DEPARTMENT" ? "Assigned department" : "Self", hint: "Server-authorized scope" },
   ];
 }
 
@@ -194,7 +194,7 @@ export default function DashboardWorkspace({ organization, go }: Props) {
       </Panel>
 
       <Panel className="p-5">
-        <div className="mb-3"><h2 className="font-semibold">Final KPI trend</h2><p className="text-xs text-slate-500">{history.scope === "ORGANIZATION" ? "Organization-authorized" : "Personal"} finalized / locked values only.</p></div>
+        <div className="mb-3"><h2 className="font-semibold">Final KPI trend</h2><p className="text-xs text-slate-500">{history.scope === "ORGANIZATION" ? "Organization-authorized" : history.scope === "DEPARTMENT" ? "Assigned-department" : "Personal"} finalized / locked values only.</p></div>
         {trendData.length ? <div className="h-44"><ResponsiveContainer width="100%" height="100%"><LineChart data={trendData}><CartesianGrid stroke="#edf0f4" vertical={false}/><XAxis dataKey="period" tick={{ fontSize: 10 }} axisLine={false} tickLine={false}/><YAxis domain={[0,10]} tick={{ fontSize: 10 }} axisLine={false} tickLine={false}/><Tooltip/><Line type="monotone" dataKey="score" stroke="#3156d3" strokeWidth={2.5} dot={{ r: 3 }}/></LineChart></ResponsiveContainer></div> : <div className="grid h-44 place-items-center text-sm text-slate-400"><div className="text-center"><BarChart3 size={22} className="mx-auto mb-2"/>No finalized history yet.</div></div>}
       </Panel>
     </div>

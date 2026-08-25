@@ -1,14 +1,29 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 import type { AppRole } from "@/server/auth/types";
 import { getDb } from "@/server/db/client";
-import { departments, evaluationPeriods, memberEvaluations, members, teams } from "@/server/db/schema";
+import { departmentHeadAssignments, departments, evaluationPeriods, memberEvaluations, members, teams } from "@/server/db/schema";
 import { ApiError } from "@/server/http";
 import { buildHistoricalAnalytics } from "./history";
 
 export async function getHistoricalAnalytics(input: { organizationId: string; actorUserId: string; actorRole: AppRole }) {
-  const organizationWide = input.actorRole === "ADMINISTRATOR" || input.actorRole === "DEPARTMENT_HEAD";
+  const scope = input.actorRole === "ADMINISTRATOR"
+    ? "ORGANIZATION" as const
+    : input.actorRole === "DEPARTMENT_HEAD"
+      ? "DEPARTMENT" as const
+      : "SELF" as const;
   const conditions = [eq(evaluationPeriods.organizationId, input.organizationId)];
-  if (!organizationWide) conditions.push(eq(members.userId, input.actorUserId));
+  if (scope === "SELF") {
+    conditions.push(eq(members.userId, input.actorUserId));
+  } else if (scope === "DEPARTMENT") {
+    conditions.push(sql`exists (
+      select 1
+      from ${departmentHeadAssignments}
+      where ${departmentHeadAssignments.userId} = ${input.actorUserId}
+        and ${departmentHeadAssignments.departmentId} = ${departments.id}
+        and ${departmentHeadAssignments.effectiveFrom} <= ${evaluationPeriods.startsOn}
+        and (${departmentHeadAssignments.effectiveTo} is null or ${departmentHeadAssignments.effectiveTo} >= ${evaluationPeriods.startsOn})
+    )`);
+  }
 
   const rows = await getDb().select({
     periodId: evaluationPeriods.id,
@@ -32,7 +47,7 @@ export async function getHistoricalAnalytics(input: { organizationId: string; ac
     .orderBy(asc(evaluationPeriods.startsOn), asc(members.name));
 
   try {
-    return buildHistoricalAnalytics(rows, organizationWide ? "ORGANIZATION" : "SELF");
+    return buildHistoricalAnalytics(rows, scope);
   } catch (error) {
     if (error instanceof Error) throw new ApiError(409, "HISTORICAL_DATA_CORRUPT", error.message);
     throw error;

@@ -8,6 +8,21 @@ Do not run database migrations automatically in application startup. Run migrati
 ## Required environment
 Supply `APP_URL`, `DATABASE_URL`, `AUTH_SECRET`, `METRICS_TOKEN`, `NODE_ENV=production`, and `LOG_LEVEL` through the deployment platform or secret manager. Never bake `.env` files or credentials into the image. `METRICS_TOKEN` must be independent from `AUTH_SECRET` and at least 32 characters.
 
+## Repository/local release preflight
+Before creating a release checkpoint, run:
+
+```bash
+npm ci
+npm run proof:release-local
+npm run proof:jira-real
+```
+
+`proof:release-local` is a cross-platform Node orchestrator. It sequentially runs static/unit/build verification, production dependency audit, migration parity, critical DB/API proofs, observability, real system-Chrome E2E, and isolated backup/restore. It intentionally excludes real Jira, remote CI, container-runtime and target-production gates.
+
+`proof:jira-real` is a separate credentialed integration gate. If the required approved Jira workspace, bounded JQL and secret are unavailable, the verifier returns `BLOCKED_EXTERNAL`; that result is expected blocker evidence and is not a production PASS.
+
+Do not invoke the aggregate local-release orchestrator with an outer `--env-file=.env.local`: `.env.local` is development-scoped and may contain `NODE_ENV=development`, while the nested production build must be allowed to establish its production environment. DB/runtime proof scripts load `.env.local` individually where required.
+
 ## Release sequence
 1. Build one immutable image from the reviewed commit and record its digest/tag.
 2. Run CI gates: `npm ci`, lint, typecheck, unit tests, production build, clean-database migration smoke, migration-state verification, and production dependency audit.

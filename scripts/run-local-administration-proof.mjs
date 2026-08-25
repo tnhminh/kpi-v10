@@ -38,7 +38,8 @@ let assignmentId = null;
 try {
   const [organization] = await sql`select id from organizations where slug = 'kpi-local' limit 1`;
   const [department] = await sql`select d.id, d.name from departments d where d.organization_id = ${organization.id} and d.active = true order by d.name limit 1`;
-  if (!organization || !department) throw new Error("Local organization/department seed is required.");
+  const [periodBoundary] = await sql`select min(starts_on)::text as starts_on from evaluation_periods where organization_id = ${organization.id}`;
+  if (!organization || !department || !periodBoundary?.starts_on) throw new Error("Local organization/department/evaluation seed is required.");
   const passwordHash = await hashPassword(password);
 
   const [admin] = await sql`insert into users (email, display_name, password_hash, role, active) values (${adminEmail}, 'Administration Proof Admin', ${passwordHash}, 'ADMINISTRATOR', true) on conflict (email) do update set display_name = excluded.display_name, password_hash = excluded.password_hash, role = 'ADMINISTRATOR', active = true, updated_at = now() returning id`;
@@ -50,24 +51,50 @@ try {
 
   const login = await request("/api/auth/login", { method: "POST", body: JSON.stringify({ email: adminEmail, password }) });
   const cookie = (login.response.headers.get("set-cookie") || "").split(";")[0];
+  const headLogin = await request("/api/auth/login", { method: "POST", body: JSON.stringify({ email: headEmail, password }) });
+  const headCookie = (headLogin.response.headers.get("set-cookie") || "").split(";")[0];
+  const historyWithoutAssignment = (await request(`/api/organizations/${organization.id}/analytics/history`, {}, headCookie)).data;
+  if (historyWithoutAssignment.scope !== "DEPARTMENT" || historyWithoutAssignment.summary.totalCount !== 0) {
+    throw new Error("Department Head historical analytics leaked data without an effective department assignment.");
+  }
+
   const users = (await request(`/api/organizations/${organization.id}/administration/users`, {}, cookie)).data;
   if (!users.some((user) => user.userId === headId && user.role === "DEPARTMENT_HEAD" && user.userActive && user.accessActive)) throw new Error("Eligible Department Head was not listed by administration API.");
 
-  const today = new Date().toISOString().slice(0, 10);
-  const created = await request(`/api/organizations/${organization.id}/administration/department-head-assignments`, { method: "POST", body: JSON.stringify({ departmentId: department.id, userId: headId, effectiveFrom: today, effectiveTo: null }) }, cookie);
+  const effectiveFrom = periodBoundary.starts_on;
+  const effectiveTo = effectiveFrom;
+  const created = await request(`/api/organizations/${organization.id}/administration/department-head-assignments`, { method: "POST", body: JSON.stringify({ departmentId: department.id, userId: headId, effectiveFrom, effectiveTo: null }) }, cookie);
   assignmentId = created.data.id;
+  const historyWithAssignment = (await request(`/api/organizations/${organization.id}/analytics/history`, {}, headCookie)).data;
+  if (historyWithAssignment.scope !== "DEPARTMENT" || historyWithAssignment.summary.totalCount <= 0) {
+    throw new Error("Department Head historical analytics did not include effectively assigned department history.");
+  }
   const auditAfterCreate = (await request(`/api/organizations/${organization.id}/audit?limit=100`, {}, cookie)).data.find((event) => event.action === "DEPARTMENT_HEAD_ASSIGNMENT_CREATED" && event.entityId === assignmentId && event.requestId === created.requestId);
   if (!auditAfterCreate) throw new Error("Create assignment audit/requestId correlation failed.");
 
-  const closed = await request(`/api/organizations/${organization.id}/administration/department-head-assignments/${assignmentId}`, { method: "PATCH", body: JSON.stringify({ effectiveTo: today }) }, cookie);
+  const closed = await request(`/api/organizations/${organization.id}/administration/department-head-assignments/${assignmentId}`, { method: "PATCH", body: JSON.stringify({ effectiveTo }) }, cookie);
   const auditAfterClose = (await request(`/api/organizations/${organization.id}/audit?limit=100`, {}, cookie)).data.find((event) => event.action === "DEPARTMENT_HEAD_ASSIGNMENT_CLOSED" && event.entityId === assignmentId && event.requestId === closed.requestId);
   if (!auditAfterClose) throw new Error("Close assignment audit/requestId correlation failed.");
 
   const assignments = (await request(`/api/organizations/${organization.id}/administration/department-head-assignments`, {}, cookie)).data;
   const retained = assignments.find((item) => item.id === assignmentId);
-  if (!retained || retained.effectiveFrom !== today || retained.effectiveTo !== today) throw new Error("Closed assignment history was not preserved.");
+  if (!retained || retained.effectiveFrom !== effectiveFrom || retained.effectiveTo !== effectiveTo) throw new Error("Closed assignment history was not preserved.");
 
-  console.log(JSON.stringify({ loginStatus: login.response.status, organizationId: organization.id, department: department.name, eligibleDepartmentHeadListed: true, assignmentCreated: true, createAuditCorrelated: true, assignmentClosed: true, closeAuditCorrelated: true, historicalAssignmentRetained: true, effectiveRange: `${today} -> ${today}` }, null, 2));
+  console.log(JSON.stringify({
+    loginStatus: login.response.status,
+    organizationId: organization.id,
+    department: department.name,
+    eligibleDepartmentHeadListed: true,
+    historyWithoutAssignment: historyWithoutAssignment.summary.totalCount,
+    historyWithAssignment: historyWithAssignment.summary.totalCount,
+    historicalAnalyticsScope: historyWithAssignment.scope,
+    assignmentCreated: true,
+    createAuditCorrelated: true,
+    assignmentClosed: true,
+    closeAuditCorrelated: true,
+    historicalAssignmentRetained: true,
+    effectiveRange: `${effectiveFrom} -> ${effectiveTo}`,
+  }, null, 2));
 } finally {
   if (adminId) await sql`update users set active = false, updated_at = now() where id = ${adminId}`.catch(() => undefined);
   if (headId) await sql`update users set active = false, updated_at = now() where id = ${headId}`.catch(() => undefined);

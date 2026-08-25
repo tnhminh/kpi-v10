@@ -28,7 +28,9 @@
     "db:proof:user-onboarding": "node --env-file=.env.local scripts/run-local-user-onboarding-proof.mjs",
     "proof:observability": "node --env-file=.env.local scripts/run-local-observability-proof.mjs",
     "proof:browser-e2e": "node --env-file=.env.local scripts/run-local-browser-e2e.mjs",
-    "proof:restore": "node --env-file=.env.local scripts/run-local-restore-drill.mjs"
+    "proof:restore": "node --env-file=.env.local scripts/run-local-restore-drill.mjs",
+    "proof:jira-real": "node --env-file=.env.local scripts/run-real-jira-sync-proof.mjs",
+    "proof:release-local": "node scripts/run-local-release-proof.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.102.2",

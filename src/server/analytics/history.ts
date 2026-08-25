@@ -25,7 +25,9 @@ function round2(value: number) {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
-export function buildHistoricalAnalytics(rows: HistoricalEvaluationRow[], scope: "SELF" | "ORGANIZATION") {
+export type HistoricalAnalyticsScope = "SELF" | "DEPARTMENT" | "ORGANIZATION";
+
+export function buildHistoricalAnalytics(rows: HistoricalEvaluationRow[], scope: HistoricalAnalyticsScope) {
   const periods = new Map<string, HistoricalEvaluationRow[]>();
   for (const row of rows) {
     const values = periods.get(row.periodId) ?? [];

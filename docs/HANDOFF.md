@@ -16,11 +16,15 @@ Teams, Members, KPI Templates, KPI Builder, Metric Library, Scoring Rules, Rank 
 
 ## Productionization rule
 Before starting work, read:
-1. `docs/PRODUCTION_PLAN.md`
+1. `docs/TASKS.md`
 2. `docs/STATUS.md`
-3. `docs/ARCHITECTURE.md`
-4. `docs/DECISIONS.md`
-5. `docs/QA.md`
+3. `docs/HANDOFF.md`
+4. `docs/PRODUCTION_PLAN.md`
+5. `docs/RELEASE_GATES.md`
+6. `docs/TRACEABILITY.md`
+7. `docs/ARCHITECTURE.md`
+8. `docs/DECISIONS.md`
+9. `docs/QA.md`
 
 After every task:
 - update status;
@@ -107,7 +111,7 @@ After every task:
 - `evaluation:run` and `evaluation:ingest` are separate. Department Head can operate evaluation flow but trusted facts/evidence ingestion is Administrator-only at the current boundary.
 - Migrations `0007_evaluation_historical_integrity.sql` and `0008_evaluation_resolution_freeze.sql` freeze submitted metric semantics, freeze period assignments for INSERT/UPDATE/DELETE after collection starts, and require exact persisted membership resolution.
 - Live PostgreSQL verification: 14/14 eligible members persisted, 55 evaluated criteria, one deliberate critical-data member remained NOT_EVALUATED; period reached SYSTEM_EVALUATED. Trigger probes confirmed semantic metric edits, assignment UPDATE/DELETE, null membership, and mismatched membership are blocked.
-- Final automated gates: lint PASS, typecheck PASS, 22 test files / 106 tests PASS, Next.js 16.3.2 production build PASS. Browser click-through remains environment-blocked because the ChatCode browser engine is unavailable.
+- Final automated gates: lint PASS, typecheck PASS, 22 test files / 106 tests PASS, Next.js 16.3.2 production build PASS. Later T10-H system-Chrome E2E now covers Evaluation Periods/System Evaluation click-through with zero page errors.
 
 ## T07 completed checkpoint
 - `src/server/review/repository.ts` is authoritative for Leader Review, Department Head review, quality resolution/waiver, finalization, ranking, snapshot lock and period workflow advancement.
@@ -119,7 +123,7 @@ After every task:
 - `0009_review_finalization_lock.sql` enforces lifecycle monotonicity, finalized/locked result immutability, append-only adjustments, quality freeze and historical-snapshot immutability at PostgreSQL boundary.
 - `0010_review_scope_quality_resolution.sql` adds period-effective Department Head assignments and auditable quality-resolution metadata/guards.
 - Live local proof: 14 review rows available; Department Head queue 0 without assignment → 14 with effective assignment → 0 after removal. A deliberate critical-data member was Head-reviewed, explicitly waived with reason, finalized and locked; PostgreSQL blocked mutation of the LOCKED evaluation, historical snapshot and resolved quality record.
-- Final automated gates: lint PASS, typecheck PASS, 24 test files / 116 tests PASS, Next.js 16.3.2 production build PASS. Browser click-through remains environment-blocked by unavailable ChatCode browser capability.
+- Final automated gates: lint PASS, typecheck PASS, 24 test files / 116 tests PASS, Next.js 16.3.2 production build PASS. Later T10-H system-Chrome E2E now covers Leader Review/Calibration click-through with zero page errors.
 
 ## T08 completed checkpoint
 - T08-A: Jira connector, explicit member mapping, sync-run history, mutable raw/current facts, protected Admin-only Jira APIs and API-backed Jira Control Center are implemented. `0011_jira_sync_foundation.sql` is applied locally and credentials remain external through `secretRef`.
@@ -143,7 +147,7 @@ After every task:
 - Final T09 automated gate: lint PASS, typecheck PASS, 29 test files / 134 tests PASS, Next.js 16.3.2 production build PASS.
 
 ## T10 hardening checkpoint (in progress)
-- T10-A: `output: "standalone"`, non-root multi-stage `Dockerfile`, `.dockerignore`, GitHub CI workflow, migration parity verification, `docs/OPERATIONS.md`, and `docs/RELEASE_CHECKLIST.md` are in repo. Local parity is 13/13 migrations; `npm audit --omit=dev` reports 0 vulnerabilities; standalone server boot returned `/api/health` 200 and `/api/ready` 200. Docker image build is not claimed because Docker CLI is absent in this environment.
+- T10-A: `output: "standalone"`, non-root multi-stage `Dockerfile`, `.dockerignore`, GitHub CI workflow, migration parity verification, `docs/OPERATIONS.md`, and `docs/RELEASE_CHECKLIST.md` are in repo. Local parity is 14/14 migrations through `0014_user_onboarding`; `npm audit --omit=dev` reports 0 vulnerabilities; standalone server boot returned `/api/health` 200 and `/api/ready` 200. Docker image build is not claimed because Docker CLI is absent in this environment.
 - T10-B: `src/components/dashboard-workspace.tsx` replaced hard-coded executive dashboard numbers with role-scoped persisted History/Evaluation/Teams/Members APIs. Live proof: 6 teams, 14 members, 14 current evaluations, history score 8.72 and coverage 14/28.
 - T10-C: Metric Library, Scoring Rules, Data Quality and Rank Schemes are API-backed through `src/components/configuration-insights-workspace.tsx`; `/kpi/rank-schemes` validates stored bands with the domain validator; Evaluation Period creation can persist a selected rank scheme. Live proof: 4 metrics, 1 scheme/7 bands, 8 persisted scoring rules and 3 persisted quality issues.
 - T10-D: KPI configuration writes now carry actor/requestId and append audit in the same transaction for metric creation, version cloning, criterion create/update/delete, criterion metric binding and scoring-rule replacement. Live idempotent criterion proof correlated `KPI_CRITERION_UPDATED` to the HTTP request ID and confirmed actor retention.
@@ -154,7 +158,7 @@ After every task:
 - Current full gate: lint PASS, typecheck PASS, 31 test files / 146 tests PASS, Next.js 16.3.2 production build PASS.
 
 ## Current next action
-T10 remains in progress. Administration onboarding, Department Head assignment management, and repository/local observability hooks are complete. Remaining priorities are browser/E2E regression, real Atlassian credentialed sync, production/CI runtime validation (including Docker image build and backup restore rehearsal), and target-environment central log/metrics ingestion plus alert validation.
+T11 detailed planning/docs, T12 Department Head analytics scope hardening and T13 aggregate local release proof are complete and green. T14 real Jira verifier is implemented and fail-closed; credentialed execution remains BLOCKED_EXTERNAL until approved workspace/JQL/credentials exist. The next internally actionable gate is T15: checkpoint/push this reviewed state and prove remote GitHub CI. Docker/container and target-production infrastructure/telemetry/deploy remain external gates.
 
 ## Environment state
 A local PostgreSQL 18 development database is now provisioned for this project. Migrations `0001`–`0014` were applied successfully on 2026-08-25; the initial reserved-keyword defect in migration `0001` for `team_memberships."primary"` was fixed before the fresh migration baseline completed. A local administrator was provisioned through `scripts/bootstrap-local-admin.mjs`, and live `/api/ready`, `/api/auth/login`, and authenticated `/api/organizations` calls returned HTTP 200.
@@ -163,4 +167,4 @@ Local persistent demo data is provisioned through `npm run db:seed:local` (`scri
 
 Production-shaped local Jira demo evidence is provisioned through `npm run db:seed:jira-demo` (`scripts/seed-local-jira-demo.mjs`). It currently persists one demo Jira workspace, 14 explicit account mappings, 87 issues/current normalized fact rows (84 mapped, 3 intentionally unmapped), a successful demo sync-run, and controlled missing-field fixtures for Data Quality. No Jira token is stored. The full field/fact contract is in `docs/JIRA_DEMO_DATA.md`.
 
-Secrets remain local-only in git-ignored `.env.local`; do not copy them into source, docs, logs, CI, or production. Local T07/T08 probes use short-lived verification identities/passwords only in process memory and clean them up after use. Production/CI database provisioning remains outstanding. Local production-style user onboarding is now implemented and live-proven through Administration Settings with forced first-login password rotation. Browser interaction/reload coverage remains environment-blocked while ChatCode browser capability is unavailable.
+Secrets remain local-only in git-ignored `.env.local`; do not copy them into source, docs, logs, CI, or production. Local T07/T08/T10 proof identities use short-lived random passwords in process memory and are deactivated/revoked or otherwise safely cleaned. System-Chrome browser interaction/reload proof is PASS, and isolated PostgreSQL backup/restore + restored standalone readiness proof is PASS. Production/CI database provisioning, real Jira credentials, container runtime evidence and target-production infrastructure remain outstanding.

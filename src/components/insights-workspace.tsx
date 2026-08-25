@@ -39,7 +39,7 @@ export function HistoricalAnalyticsWorkspace({ organization }: { organization: O
     <PageTitle eyebrow="Insights" title="Historical analytics" subtitle="Only authoritative FINALIZED/LOCKED KPI values contribute to historical scores. Incomplete periods remain visible in coverage and are never converted to zero."/>
     {query.isPending ? <Loading label="Loading historical evaluations…"/> : query.error ? <ErrorPanel error={query.error}/> : query.data ? <>
       <div className="grid grid-cols-4 gap-3">
-        <Stat label="Historical score" value={query.data.summary.score === null ? "N/A" : query.data.summary.score.toFixed(2)} hint={query.data.scope === "ORGANIZATION" ? "Organization-wide valid final values" : "Your valid final values"}/>
+        <Stat label="Historical score" value={query.data.summary.score === null ? "N/A" : query.data.summary.score.toFixed(2)} hint={query.data.scope === "ORGANIZATION" ? "Organization-wide valid final values" : query.data.scope === "DEPARTMENT" ? "Assigned-department valid final values" : "Your valid final values"}/>
         <Stat label="Coverage" value={`${query.data.summary.validCount} / ${query.data.summary.totalCount}`} hint="Finalized/locked / persisted evaluations"/>
         <Stat label="Latest valid period" value={query.data.latest?.periodKey ?? "N/A"} hint={query.data.latest ? `KPI ${query.data.latest.score.toFixed(2)}` : "No finalized/locked value yet"}/>
         <Stat label="Latest rank" value={query.data.latest?.rank ?? "N/A"} hint={query.data.latest?.coefficient === null || query.data.latest?.coefficient === undefined ? "No coefficient" : `Coefficient ${query.data.latest.coefficient}`}/>

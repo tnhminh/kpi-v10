@@ -351,7 +351,7 @@ export interface AuditEventDto {
 }
 
 export interface HistoricalAnalyticsDto {
-  scope: "SELF" | "ORGANIZATION";
+  scope: "SELF" | "DEPARTMENT" | "ORGANIZATION";
   summary: { score: number | null; validCount: number; totalCount: number; coverageLabel: string };
   latest: { periodKey: string; score: number; rank: string | null; coefficient: number | null } | null;
   rankDistribution: Array<{ rank: string; count: number }>;

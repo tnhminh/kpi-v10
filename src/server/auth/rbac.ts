@@ -46,10 +46,11 @@ export function hasPermission(role: AppRole, permission: Permission): boolean {
   return ROLE_PERMISSIONS[role].includes(permission);
 }
 
-export function canReviewTeam(role: AppRole, targetTeamId: string, ledTeamIds: readonly string[]): boolean {
+export function canReviewTeam(role: AppRole, targetTeamId: string, authorizedTeamIds: readonly string[]): boolean {
   if (!hasPermission(role, "evaluation:team:review")) return false;
-  if (role === "ADMINISTRATOR" || role === "DEPARTMENT_HEAD") return true;
-  return role === "TEAM_LEADER" && ledTeamIds.includes(targetTeamId);
+  if (role === "ADMINISTRATOR") return true;
+  if (role === "DEPARTMENT_HEAD" || role === "TEAM_LEADER") return authorizedTeamIds.includes(targetTeamId);
+  return false;
 }
 
 export function canReadMemberEvaluation(input: {
@@ -57,9 +58,9 @@ export function canReadMemberEvaluation(input: {
   actorMemberId: string | null;
   targetMemberId: string;
   targetTeamId: string;
-  ledTeamIds: readonly string[];
+  authorizedTeamIds: readonly string[];
 }): boolean {
-  if (input.role === "ADMINISTRATOR" || input.role === "DEPARTMENT_HEAD") return true;
-  if (input.role === "TEAM_LEADER") return input.ledTeamIds.includes(input.targetTeamId);
+  if (input.role === "ADMINISTRATOR") return true;
+  if (input.role === "DEPARTMENT_HEAD" || input.role === "TEAM_LEADER") return input.authorizedTeamIds.includes(input.targetTeamId);
   return input.role === "MEMBER" && input.actorMemberId === input.targetMemberId;
 }
