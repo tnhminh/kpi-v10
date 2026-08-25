@@ -275,6 +275,27 @@ Verification:
 - [x] `npm run proof:browser-e2e` PASS in system Chrome across Members, KPI Templates, KPI Builder, Metric Library, Scoring Rules, Evaluation Periods, System Evaluation, Leader Review, Calibration, Data Quality, Jira Integration, Historical Analytics, Rank Schemes, Audit Log and Settings; rendered-copy scan PASS and pageErrors=0.
 - [x] Localhost root, `/api/health`, and `/api/ready` all returned HTTP 200 after the changes.
 
+## T10-K — Adversarial browser UI/UX review
+**Status:** PASS
+
+Initial real-Chrome findings:
+- [x] P1: Teams and Members exposed `Open` buttons with no observable behavior.
+- [x] P1: 390px mobile shell overflowed by ~229–237px and the fixed 224px sidebar occupied most of the viewport.
+- [x] P1: System Evaluation, Leader Review, Calibration, Data Quality and Settings had interactive controls clipped outside the mobile viewport.
+- [x] P2: global search accepted text but had no observable behavior; header period chip was hard-coded to `2026-09`.
+- [x] P2: duplicate `My Performance` / Historical Analytics navigation shared the same page key.
+- [x] P2: visible selects/inputs and icon/dialog controls lacked programmatic labels or accessible names on several workspaces.
+
+Remediation verification:
+- [x] Root viewport explicitly uses device width / initial scale 1.
+- [x] Mobile navigation is an off-canvas drawer; desktop collapsed/full sidebar behavior is preserved.
+- [x] Dead Teams/Members `Open` actions, fake global search and duplicate history navigation were removed.
+- [x] Hard-coded period chip was replaced with real Evaluation Periods navigation.
+- [x] Evaluation, Review/Calibration, Data Quality, Administration, KPI Builder and Jira use responsive stacking/local scroll regions instead of clipped desktop-only grids.
+- [x] `npm run proof:ui-ux-audit` uses real system Chrome, desktop 1600x1000 and mobile 390x844, and traverses 16 critical surfaces in each viewport.
+- [x] Final desktop/mobile audits report overflow=0, unclipped opened-workspace controls, 0 unlabeled visible controls and 0 unnamed visible buttons on all 16 surfaces.
+- [x] Final browser `pageErrors=[]` and `findings=[]`.
+
 ## T15 — Remote GitHub CI execution
 **Status:** PASS
 

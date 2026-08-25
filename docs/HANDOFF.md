@@ -163,6 +163,13 @@ After every task:
 - Added `src/components/ui-copy.test.ts` and extended `scripts/run-local-browser-e2e.mjs` to reject mojibake/internal labels in rendered text while traversing 15 critical surfaces.
 - Verification: lint/typecheck/build PASS, 32/32 test files and 149/149 tests PASS, Chrome E2E PASS with 0 page errors, source scans PASS, localhost root/health/readiness 200.
 
+## T10-K UI/UX adversarial audit closeout
+- Added `scripts/run-ui-ux-audit.mjs` as a repeatable local-only real-Chrome UX regression harness with temporary Admin identity cleanup and git-ignored screenshot evidence.
+- Initial browser review found P1 dead Teams/Members actions, broken 390px mobile shell/sidebar, clipped mobile controls across multiple workspaces, plus P2 fake search/navigation/accessibility defects.
+- The shell now has an explicit device-width viewport, mobile drawer navigation, responsive header/main spacing, no fake global search/hard-coded period chip, and no duplicate My Performance/history navigation.
+- Evaluation, Review/Calibration, Data Quality, Administration, KPI Builder and Jira have responsive stack/scroll boundaries and audited accessible labels/names.
+- Final `proof:ui-ux-audit`: 16/16 desktop surfaces at 1600x1000 and 16/16 mobile surfaces at 390x844, page overflow=0, opened-workspace offscreenInteractive=0, unlabeledControls=0, unnamedButtons=0, pageErrors=[], findings=[].
+
 ## Current next action
 T11–T13 are complete and green. T15 remote GitHub CI is complete after fixing a CI-only metrics-token test-isolation defect; commit `c9274f8` completed successfully. T16 is also complete: GitHub Actions run `32852668799` on `e2171c9` built the production image, recorded content-addressed image ID `sha256:ef6b06304378a1d1002e554e6be5d41c137c032ff7823b264bd4bf96ce44b1f7`, verified UID 1001, and received container health/readiness PASS. T14 real Jira remains BLOCKED_EXTERNAL until approved credentials exist; T17 target-production infrastructure/telemetry/deploy remains external. Next internal work is repository adversarial preflight.
 

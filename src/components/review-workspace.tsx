@@ -162,23 +162,23 @@ export default function ReviewWorkspace({ organization, mode }: { organization: 
   if (periodsQuery.isPending) return <Card className="p-8"><div className="flex items-center justify-center gap-2 text-sm text-slate-500"><LoaderCircle size={16} className="animate-spin"/> Loading review periods…</div></Card>;
   if (periodsQuery.error) return <Card className="border-rose-200 p-5 text-sm text-rose-700">{errorMessage(periodsQuery.error)}</Card>;
 
-  return <div className="-m-7 flex h-[calc(100vh-65px)] flex-col overflow-hidden">
-    <div className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-3">
+  return <div className="-m-3 flex min-h-[calc(100vh-65px)] flex-col sm:-m-5 lg:-m-7 lg:h-[calc(100vh-65px)] lg:overflow-hidden">
+    <div className="flex flex-col gap-3 border-b border-slate-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
       <div>
         <div className="text-sm font-semibold text-slate-950">{mode === "LEADER" ? "Leader Review" : "Department Head Calibration"}</div>
         <div className="mt-0.5 text-[11px] text-slate-500">Persisted layer review · previous scores stay immutable · changed scores require an audit reason.</div>
       </div>
-      <div className="flex items-center gap-2">
-        <select value={effectivePeriodId} onChange={(event) => { setPeriodId(event.target.value); setSelectedId(""); setScores({}); setReasons({}); setActionMessage(null); }} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold">
+      <div className="flex flex-wrap items-center gap-2">
+        <select aria-label="Evaluation period" value={effectivePeriodId} onChange={(event) => { setPeriodId(event.target.value); setSelectedId(""); setScores({}); setReasons({}); setActionMessage(null); }} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold">
           {periods.map((item) => <option key={item.id} value={item.id}>{item.key} · {item.status}</option>)}
         </select>
         {period && <Pill tone={statusTone(period.status)}>{period.status}</Pill>}
       </div>
     </div>
 
-    <div className="grid min-h-0 flex-1 grid-cols-[260px_minmax(0,1fr)_310px] bg-slate-100">
-      <aside className="kpi-scroll overflow-y-auto border-r border-slate-200 bg-white p-3">
-        <div className="relative mb-3"><Search size={13} className="absolute left-2.5 top-2.5 text-slate-400"/><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find member or team…" className="w-full rounded-lg border border-slate-200 py-2 pl-8 pr-2 text-xs outline-none"/></div>
+    <div className="grid min-h-0 flex-1 grid-cols-1 bg-slate-100 lg:grid-cols-[260px_minmax(0,1fr)_310px]">
+      <aside className="kpi-scroll border-b border-slate-200 bg-white p-3 lg:overflow-y-auto lg:border-b-0 lg:border-r">
+        <div className="relative mb-3"><Search size={13} className="absolute left-2.5 top-2.5 text-slate-400"/><input aria-label="Search review queue" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find member or team…" className="w-full rounded-lg border border-slate-200 py-2 pl-8 pr-2 text-xs outline-none"/></div>
         {queueQuery.isPending ? <div className="flex items-center justify-center gap-2 py-8 text-xs text-slate-500"><LoaderCircle size={14} className="animate-spin"/> Loading queue…</div> : queueQuery.error ? <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">{errorMessage(queueQuery.error)}</div> : filtered.length === 0 ? <div className="rounded-lg bg-slate-50 p-4 text-xs text-slate-500">No members are visible in this review scope.</div> : filtered.map((member) => {
           const critical = member.qualityIssues.filter((issue) => issue.severity === "CRITICAL" && !issue.resolvedAt).length;
           return <button key={member.id} onClick={() => { setSelectedId(member.id); setActionMessage(null); }} className={`mb-1.5 w-full rounded-lg border p-3 text-left ${effectiveSelectedId === member.id ? "border-blue-300 bg-blue-50" : "border-transparent hover:bg-slate-50"}`}>
@@ -189,19 +189,19 @@ export default function ReviewWorkspace({ organization, mode }: { organization: 
         })}
       </aside>
 
-      <main className="kpi-scroll overflow-y-auto p-5">
+      <main className="kpi-scroll min-w-0 p-3 sm:p-5 lg:overflow-y-auto">
         {!selected ? <Card className="p-10 text-center text-sm text-slate-500">Select a member to inspect the persisted review layers.</Card> : <>
-          <div className="mb-4 flex items-start justify-between gap-4">
+          <div className="mb-4 flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between xl:gap-4">
             <div><div className="text-lg font-semibold text-slate-950">{selected.memberName}</div><div className="mt-1 text-xs text-slate-500">{selected.employeeId} · {selected.teamName} · {selected.templateName} v{selected.version}</div></div>
-            <div className="grid grid-cols-4 gap-px overflow-hidden rounded-xl border border-slate-200 bg-slate-200 text-center">
+            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-slate-200 bg-slate-200 text-center sm:grid-cols-4">
               {[["System", selected.systemScore], ["Leader", selected.leaderScore], ["Head", selected.headScore], ["Final", selected.finalScore]].map(([label, score]) => <div key={String(label)} className="min-w-20 bg-white px-3 py-2"><div className="text-[9px] font-bold uppercase text-slate-400">{label}</div><div className="mt-1 text-sm font-semibold">{scoreLabel(score as number | null)}</div></div>)}
             </div>
           </div>
 
           {criticalCount > 0 && <Card className="mb-4 border-rose-200 bg-rose-50/60 p-4"><div className="flex gap-3"><ShieldAlert size={18} className="mt-0.5 text-rose-600"/><div><div className="text-sm font-semibold text-rose-800">{criticalCount} unresolved critical data-quality issue{criticalCount > 1 ? "s" : ""}</div><div className="mt-1 text-xs text-rose-700">Human review may record a justified score, but finalization remains blocked until each critical issue is explicitly resolved or waived with an auditable actor and reason.</div></div></div></Card>}
 
-          <Card className="overflow-hidden">
-            <table className="w-full text-left text-xs">
+          <Card className="overflow-x-auto">
+            <table className="w-full min-w-[900px] text-left text-xs">
               <thead className="bg-slate-50 text-slate-500"><tr>{["Criterion", "Max", "System", "Leader", "Head", "Final", mode === "LEADER" ? "Leader input" : "Head input", "Confidence"].map((header) => <th key={header} className="px-3 py-2.5 font-semibold">{header}</th>)}</tr></thead>
               <tbody>{selected.criteria.map((criterion) => {
                 const previous = previousCriterionScore(mode, criterion);
@@ -224,7 +224,7 @@ export default function ReviewWorkspace({ organization, mode }: { organization: 
 
           {(mutationError || actionMessage) && <div className={`mt-4 rounded-lg border p-3 text-xs ${mutationError ? "border-rose-200 bg-rose-50 text-rose-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}>{mutationError ? errorMessage(mutationError) : actionMessage}</div>}
 
-          <div className="mt-4 flex items-center justify-between">
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-xs text-slate-500">{reviewEnabled ? `${changedCount} criterion change${changedCount === 1 ? "" : "s"} require${changedCount === 1 ? "s" : ""} persisted reasons.` : `Current workflow stage: ${selected.status}.`}</div>
             <div className="flex gap-2">
               {reviewEnabled && <button disabled={pending} onClick={() => reviewMutation.mutate()} className="flex items-center gap-2 rounded-lg bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white disabled:opacity-50">{reviewMutation.isPending ? <LoaderCircle size={14} className="animate-spin"/> : <CheckCircle2 size={14}/>} Complete {mode === "LEADER" ? "Leader" : "Head"} review</button>}
@@ -235,7 +235,7 @@ export default function ReviewWorkspace({ organization, mode }: { organization: 
         </>}
       </main>
 
-      <aside className="kpi-scroll overflow-y-auto border-l border-slate-200 bg-white p-4">
+      <aside className="kpi-scroll border-t border-slate-200 bg-white p-4 lg:overflow-y-auto lg:border-l lg:border-t-0">
         <div><h3 className="text-sm font-semibold">Review integrity</h3><p className="mt-1 text-[10px] leading-4 text-slate-500">System evidence remains unchanged. Each human layer is additive and historical.</p></div>
         <div className="mt-4 space-y-2">
           <Card className="p-3"><div className="text-[9px] font-bold uppercase tracking-wide text-slate-400">Authority</div><div className="mt-1 text-xs font-semibold">{mode === "LEADER" ? "Effective team leadership at period date" : "Effective department assignment at period date"}</div></Card>

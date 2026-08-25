@@ -265,6 +265,7 @@ Make sensitive mutation history tenant-scoped, append-only and request-correlate
 - T10-H real system-Chrome browser E2E/reload proof.
 - T10-I isolated PostgreSQL backup/restore + restored standalone readiness proof.
 - T10-J system-wide UI copy/encoding cleanup + rendered-copy regression coverage.
+- T10-K adversarial browser UI/UX review + responsive/accessibility remediation.
 
 ### Acceptance Criteria
 - [x] Repository/local hardening subphases have repeatable proof commands.
@@ -310,6 +311,40 @@ Remove broken UTF-8/mojibake text, spelling/grammar defects, duplicate or mislea
 
 ### Definition of Done
 Copy is source-clean and rendered-clean, regression guards exist, browser proof passes, and release/handoff docs reflect the new baseline.
+
+---
+
+## T10-K — Adversarial browser UI/UX review and remediation
+**Status:** DONE
+**Priority:** P1
+**Risk:** High (broken affordances, mobile usability, accessibility)
+**Dependencies:** T10-J
+
+### Goal
+Review the production shell and every critical workspace with a real browser at desktop and mobile sizes, convert reproducible defects into explicit tasks, fix them, and keep a repeatable regression proof.
+
+### Findings and remediation
+- **T10-K1 / P1 responsive shell:** fixed missing mobile viewport contract, fixed 224px desktop sidebar consuming a 390px viewport, added an off-canvas mobile navigation drawer/backdrop, and removed page-level horizontal clipping.
+- **T10-K2 / P1 broken affordances:** removed Teams/Members `Open` buttons that had no handler, removed the non-functional global search input, replaced the hard-coded `2026-09` header chip with a real Evaluation Periods navigation action, and removed duplicate `My Performance` navigation that shared the Historical Analytics route key.
+- **T10-K3 / P1-P2 workspace UX/accessibility:** made Evaluation, Review/Calibration, Data Quality, Administration, KPI Builder and Jira responsive; converted wide tables/pipelines to intentional local scrolling; stacked desktop-only grids on mobile; added programmatic labels and accessible names to visible controls/dialog buttons.
+
+### Browser acceptance criteria
+- [x] System Chrome desktop viewport 1600x1000 traverses 16 critical surfaces with page overflow=0.
+- [x] System Chrome mobile viewport 390x844 traverses the same 16 surfaces with page overflow=0.
+- [x] No visible interactive control is clipped outside the viewport unless contained in an intentional horizontal-scroll region.
+- [x] No visible form control in audited surfaces lacks a programmatic label.
+- [x] No visible button in audited surfaces lacks an accessible name.
+- [x] Browser pageErrors is empty.
+- [x] Teams/Members no longer expose dead `Open` actions; fake global search and duplicate history navigation are removed.
+
+### Verification
+- `npm run proof:ui-ux-audit`
+- `npm run proof:browser-e2e`
+- `npm run verify`
+- source/diff/secret review
+
+### Definition of Done
+All discovered P0/P1 UI/UX defects are fixed; audit returns `status=pass` with `findings=[]`; evidence is documented and the audit is reusable through an npm proof command.
 
 ---
 
