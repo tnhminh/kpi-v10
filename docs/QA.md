@@ -236,7 +236,7 @@ Verification:
 Verification to date:
 - [x] Next.js standalone production output enabled and production build PASS.
 - [x] Multi-stage non-root Dockerfile and `.dockerignore` added; Docker build itself is environment-blocked because the local host has no Docker CLI.
-- [x] CI workflow added for install, verify, PostgreSQL migration smoke/parity and production dependency audit; no remote CI execution is claimed yet.
+- [x] Remote GitHub Actions execution PASS for commit `c9274f8`: install, full verify, PostgreSQL migration/parity and production dependency audit completed successfully after one CI-only metrics-auth test isolation defect was fixed and rerun.
 - [x] Migration parity proof PASS: 14/14 migrations, latest `0014_user_onboarding`.
 - [x] `npm audit --omit=dev` reports 0 vulnerabilities.
 - [x] Standalone production server boot proof: `/api/health` 200 and `/api/ready` 200 with PostgreSQL connectivity.
@@ -260,7 +260,17 @@ Verification to date:
 - [x] Current full automated gate: lint PASS, typecheck PASS, 31 test files / 146 tests PASS, production build PASS.
 - [x] Browser click/reload E2E regression PASS via installed system Chrome: login, UI Team create, DB persistence, reload persistence, critical navigation, and zero page errors.
 - [ ] Real Atlassian credentialed sync remains unverified.
-- [ ] Production Docker image/build/deploy, remote CI execution, target pre-migration backup/restore readiness, production secret distribution, and target observability backend integration remain release gates.
+- [ ] Production/container runtime proof is being moved to GitHub Actions; target deploy, target pre-migration backup/restore readiness, production secret distribution, and target observability backend integration remain release gates.
+
+## T15 — Remote GitHub CI execution
+**Status:** PASS
+
+Verification:
+- [x] Private repository push triggered GitHub Actions for reviewed commit `7ca11bc`.
+- [x] First run failed only in `src/server/observability/metrics.test.ts` because CI configured `METRICS_TOKEN` globally while the test intended the no-token case.
+- [x] Test isolation was fixed by explicitly stubbing empty `METRICS_TOKEN`; security/runtime authorization logic was not weakened.
+- [x] CI-like local reproduction with a preset metrics token PASSed the targeted test, then full `npm run verify` PASSed 31/31 test files, 146/146 tests and production build.
+- [x] Fix commit `c9274f8` GitHub Actions run completed `success`.
 
 ## Review checklist
 - Does the implementation enforce domain rules server-side where required?

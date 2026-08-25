@@ -416,7 +416,7 @@ Production/release owner supplies approved real workspace URL, bounded JQL and s
 ---
 
 ## T15 — GitHub CI remote execution
-**Status:** READY
+**Status:** DONE
 **Priority:** P0
 **Risk:** High
 **Dependencies:** T13
@@ -428,10 +428,10 @@ Prove the committed GitHub Actions workflow on the private remote repository, no
 Private repository `tnhminh/kpi-v10` exists and `master` has been pushed. Workflow is committed.
 
 ### Acceptance Criteria
-- [ ] Remote workflow run is observed for reviewed commit.
-- [ ] Install, verify, PostgreSQL migration/parity and audit jobs PASS.
-- [ ] Any CI-only defects are fixed and rerun.
-- [ ] No secrets are printed in Actions logs.
+- [x] Remote workflow run observed for reviewed pushed commits.
+- [x] Install, verify, PostgreSQL migration/parity and production dependency audit PASS.
+- [x] First CI-only metrics-auth test isolation defect was reproduced, fixed, locally reverified and rerun.
+- [x] GitHub Actions run for commit `c9274f8` completed `success`; reviewed logs exposed no credential material.
 
 ### Failure modes
 Missing Actions permission/runner is `BLOCKED_EXTERNAL`; workflow defects are `BLOCKED_INTERNAL` and must be fixed.
@@ -439,7 +439,7 @@ Missing Actions permission/runner is `BLOCKED_EXTERNAL`; workflow defects are `B
 ---
 
 ## T16 — Container image/runtime evidence
-**Status:** BLOCKED_EXTERNAL_RUNTIME after repository validation
+**Status:** IN_PROGRESS — remote GitHub Actions runtime proof
 **Priority:** P0 when container deployment is target
 **Risk:** High
 **Dependencies:** T13
@@ -447,8 +447,8 @@ Missing Actions permission/runner is `BLOCKED_EXTERNAL`; workflow defects are `B
 ### Goal
 Build and run the reviewed release image and record immutable digest/non-root/readiness evidence.
 
-### Current blocker
-Docker and Podman are not installed/available on the current host.
+### Execution path
+Docker/Podman remain unavailable on the local host, but GitHub-hosted Ubuntu runners provide a Docker daemon. T16 now uses remote CI to build the reviewed image, record its content-addressed image ID, inspect non-root UID, start the container with runtime-injected environment, and verify health/readiness against the CI PostgreSQL service.
 
 ### Acceptance Criteria
 - [ ] `docker build` (or approved compatible builder) succeeds from reviewed commit.

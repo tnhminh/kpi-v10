@@ -115,7 +115,7 @@ Evidence: `npm run proof:restore`:
 Target production pre-migration backup and operational RPO/RTO evidence belong to T17/G13.
 
 ## G10 — CI / Supply chain / build
-**Status:** PARTIAL
+**Status:** PASS
 
 PASS locally:
 - lockfile exists,
@@ -126,11 +126,12 @@ Local PASS:
 - clean `npm ci` from lockfile,
 - `npm run proof:release-local` sequentially PASSes verify, dependency audit, migration parity, DB/API proofs, observability, real Chrome E2E and restore.
 
-Open:
-- T15 actual GitHub Actions run PASS for the reviewed pushed commit.
+Remote PASS:
+- GitHub Actions run for commit `c9274f8` completed successfully after one CI-only metrics-auth environment-isolation defect was fixed and reverified.
+- Remote job includes clean install, full verify, PostgreSQL migration/parity and production dependency audit.
 
 ## G11 — Runtime / Container
-**Status:** BLOCKED_EXTERNAL_RUNTIME
+**Status:** IN_PROGRESS — remote CI container proof
 
 PASS:
 - Next.js standalone build/runtime proof.

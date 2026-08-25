@@ -158,7 +158,7 @@ After every task:
 - Current full gate: lint PASS, typecheck PASS, 31 test files / 146 tests PASS, Next.js 16.3.2 production build PASS.
 
 ## Current next action
-T11 detailed planning/docs, T12 Department Head analytics scope hardening and T13 aggregate local release proof are complete and green. T14 real Jira verifier is implemented and fail-closed; credentialed execution remains BLOCKED_EXTERNAL until approved workspace/JQL/credentials exist. The next internally actionable gate is T15: checkpoint/push this reviewed state and prove remote GitHub CI. Docker/container and target-production infrastructure/telemetry/deploy remain external gates.
+T11–T13 are complete and green. T15 remote GitHub CI is also complete: the first Actions run exposed a CI-only metrics-token test-isolation defect; it was fixed and commit `c9274f8` completed successfully. T14 real Jira verifier is implemented and fail-closed; credentialed execution remains BLOCKED_EXTERNAL until approved workspace/JQL/credentials exist. T16 is now active through GitHub Actions container build/runtime proof; target-production infrastructure/telemetry/deploy remain external gates.
 
 ## Environment state
 A local PostgreSQL 18 development database is now provisioned for this project. Migrations `0001`–`0014` were applied successfully on 2026-08-25; the initial reserved-keyword defect in migration `0001` for `team_memberships."primary"` was fixed before the fresh migration baseline completed. A local administrator was provisioned through `scripts/bootstrap-local-admin.mjs`, and live `/api/ready`, `/api/auth/login`, and authenticated `/api/organizations` calls returned HTTP 200.

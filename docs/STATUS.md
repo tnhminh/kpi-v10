@@ -5,7 +5,7 @@ Last updated: 2026-08-25
 ## Overall
 **Phase:** Productionization
 **Production readiness:** NOT READY
-**Current task:** T15 — Remote GitHub CI execution (T11–T13 local closure PASS; T14 externally blocked)
+**Current task:** T16 — Remote container image/runtime evidence (T15 remote CI PASS; T14 externally blocked)
 
 ## Verification baseline
 - `npm run lint`: PASS after T10-G observability hardening (2026-08-25)
@@ -44,9 +44,10 @@ Last updated: 2026-08-25
 - T10-G observability checkpoint: `/api/*` requests receive stable correlation/start metadata through `src/proxy.ts`; centralized API responses emit structured completion logs, normalized route/status/error counters, request-duration histograms and `Server-Timing`; `src/instrumentation.ts` captures uncaught framework request errors; readiness exports explicit status/outcome metrics; and `/api/metrics` exposes Prometheus-compatible process-local telemetry. Production scraping requires an independent `METRICS_TOKEN` and route labels replace UUID/numeric identifiers to bound cardinality. Live local proof on port 3712 returned health 200, readiness 200, unauthenticated probe 401, correlated request/timing headers, and request/duration/error/readiness metrics. Logger boundary now also redacts sensitive-key fields, bearer tokens and credential-bearing URLs before JSON emission, with circular/Error safety. Full gate: lint PASS, typecheck PASS, 31 files / 146 tests PASS, production build PASS.
 
 ## In progress
-- T15 remote GitHub CI execution is the next internally actionable release gate.
-- T14 real Jira verifier harness is complete; credentialed execution is BLOCKED_EXTERNAL by missing `JIRA_REAL_WORKSPACE_URL`, `JIRA_REAL_JQL`, and `JIRA_BACKEND_CREDENTIALS`.
-- T16–T18 remain external runtime/production infrastructure/final-GO work.
+- T15 remote GitHub CI is DONE: initial run exposed one CI-only metrics-auth test isolation defect; fix commit c9274f8 reran successfully.
+- T16 remote container image/runtime proof is now active through GitHub Actions because the local host has no Docker/Podman.
+- T14 real Jira verifier harness is complete; credentialed execution is BLOCKED_EXTERNAL by missing JIRA_REAL_WORKSPACE_URL, JIRA_REAL_JQL, and JIRA_BACKEND_CREDENTIALS.
+- T17–T18 remain target-production infrastructure/final-GO work.
 
 ## Known production blockers
 - Active production shell/components no longer import `src/lib/kpi.ts`; Dashboard, Metric Library, Scoring Rules, Data Quality and Rank Schemes are now persisted/API-backed. `src/lib/kpi.ts` remains only as an unreferenced legacy fixture and is not production authority.
@@ -60,4 +61,4 @@ Last updated: 2026-08-25
 - Deployment, migration, backup/restore and release runbooks now exist, but production-environment deploy/restore execution has not yet been validated; Docker image build is locally environment-blocked because Docker CLI is unavailable.
 
 ## Next gate
-Next release closure sequence: create/push the reviewed T11–T14 checkpoint and prove T15 remote GitHub Actions; execute T14 real Jira credentialed proof when approved workspace/JQL/credentials exist. T16–T18 remain target/runtime gates for container evidence, production secrets/infrastructure/telemetry/deploy/rollback/smoke, and final GO. Local system-Chrome E2E, aggregate release proof and isolated restore rehearsal are already PASS and must not be reopened as blockers.
+Next release closure sequence: prove T16 container build/non-root/runtime health/readiness in GitHub Actions; execute T14 real Jira credentialed proof when approved workspace/JQL/credentials exist. T17–T18 remain target-production gates for secrets/infrastructure/telemetry/deploy/rollback/smoke and final GO. T15 remote CI, local system-Chrome E2E, aggregate release proof and isolated restore rehearsal are already PASS and must not be reopened as blockers.

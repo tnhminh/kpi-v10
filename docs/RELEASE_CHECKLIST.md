@@ -7,7 +7,7 @@ These checks do not substitute for the production-specific boxes below.
 - [x] Clean `npm ci` from lockfile PASS on 2026-08-25.
 - [x] `npm run proof:release-local` PASS on 2026-08-25: verify, production dependency audit, 14/14 migration parity, critical DB/API proofs, observability, real system-Chrome E2E, and isolated backup/restore.
 - [x] Real Jira verifier harness fails closed without credentials and does not print credential values; credentialed Jira execution remains external.
-- [ ] Remote GitHub Actions PASS for the reviewed pushed checkpoint.
+- [x] Remote GitHub Actions PASS for reviewed commit `c9274f8` after CI-only metrics-auth environment isolation was fixed and rerun.
 
 ## Build and supply chain
 - [ ] Reviewed commit/release identifier recorded.
