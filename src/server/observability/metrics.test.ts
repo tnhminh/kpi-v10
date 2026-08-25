@@ -52,11 +52,12 @@ describe("observability metrics", () => {
   });
 
   it("allows open local scraping but requires a timing-safe bearer token when configured", () => {
+    vi.stubEnv("METRICS_TOKEN", "");
     vi.stubEnv("NODE_ENV", "development");
-    expect(isMetricsRequestAuthorized(new Request("http://localhost/api/metrics"), undefined)).toBe(true);
+    expect(isMetricsRequestAuthorized(new Request("http://localhost/api/metrics"))).toBe(true);
 
     vi.stubEnv("NODE_ENV", "production");
-    expect(isMetricsRequestAuthorized(new Request("http://localhost/api/metrics"), undefined)).toBe(false);
+    expect(isMetricsRequestAuthorized(new Request("http://localhost/api/metrics"))).toBe(false);
 
     const token = "metrics-token-value-that-is-at-least-32-characters";
     expect(isMetricsRequestAuthorized(new Request("http://localhost/api/metrics", {
