@@ -6,12 +6,43 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "verify": "npm run lint && npm run typecheck && npm run test && npm run build",
+    "db:migrate": "node scripts/db-migrate.mjs",
+    "db:migrate:local": "node --env-file=.env.local scripts/db-migrate.mjs",
+    "db:verify:migrations": "node scripts/verify-migrations.mjs",
+    "db:verify:migrations:local": "node --env-file=.env.local scripts/verify-migrations.mjs",
+    "db:bootstrap-local-admin": "node --env-file=.env.local scripts/bootstrap-local-admin.mjs",
+    "db:seed:local": "node --env-file=.env.local scripts/seed-local-demo.mjs",
+    "db:seed:jira-demo": "node --env-file=.env.local scripts/seed-local-jira-demo.mjs",
+    "db:evaluate:local-demo": "node --env-file=.env.local scripts/run-local-demo-evaluation.mjs",
+    "db:evaluate:jira-demo": "node --env-file=.env.local scripts/run-local-jira-evaluation.mjs",
+    "db:proof:audit-history": "node --env-file=.env.local scripts/run-local-audit-history-proof.mjs",
+    "db:proof:dashboard": "node --env-file=.env.local scripts/run-local-dashboard-proof.mjs",
+    "db:proof:configuration-surfaces": "node --env-file=.env.local scripts/run-local-configuration-surfaces-proof.mjs",
+    "db:proof:kpi-config-audit": "node --env-file=.env.local scripts/run-local-kpi-config-audit-proof.mjs",
+    "db:proof:administration": "node --env-file=.env.local scripts/run-local-administration-proof.mjs",
+    "db:proof:user-onboarding": "node --env-file=.env.local scripts/run-local-user-onboarding-proof.mjs",
+    "proof:observability": "node --env-file=.env.local scripts/run-local-observability-proof.mjs",
+    "proof:browser-e2e": "node --env-file=.env.local scripts/run-local-browser-e2e.mjs",
+    "proof:restore": "node --env-file=.env.local scripts/run-local-restore-drill.mjs"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.102.2",
+    "clsx": "^2.1.1",
+    "drizzle-orm": "^0.45.2",
+    "lucide-react": "^1.34.0",
     "next": "16.3.2",
+    "postgres": "^3.4.9",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "recharts": "^3.10.1",
+    "tailwind-merge": "^3.6.0",
+    "zod": "^4.4.3",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -20,7 +51,9 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.2",
+    "playwright-core": "^1.62.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.11"
   }
 }

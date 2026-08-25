@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: kpi_ci
+          POSTGRES_USER: kpi_ci
+          POSTGRES_PASSWORD: kpi_ci_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kpi_ci -d kpi_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      APP_URL: http://127.0.0.1:3000
+      DATABASE_URL: postgresql://kpi_ci:kpi_ci_password@127.0.0.1:5432/kpi_ci
+      AUTH_SECRET: ci-only-auth-secret-value-at-least-32-characters
+      METRICS_TOKEN: ci-only-metrics-token-value-at-least-32-characters
+      LOG_LEVEL: warn
+      NEXT_TELEMETRY_DISABLED: 1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify application
+        run: npm run verify
+
+      - name: Apply migrations to clean PostgreSQL
+        run: npm run db:migrate
+
+      - name: Verify migration state
+        run: npm run db:verify:migrations
+
+      - name: Production dependency audit
+        run: npm audit --omit=dev --audit-level=high
